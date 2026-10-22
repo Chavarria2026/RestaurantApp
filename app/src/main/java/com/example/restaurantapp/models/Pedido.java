@@ -29,7 +29,7 @@ public class Pedido {
     private double total;
 
     @ColumnInfo(name = "estado")
-    private String estado; // pendiente, preparacion, listo, entregado, pagado, cancelado
+    private String estado;
 
     @ColumnInfo(name = "usuario_id")
     private int usuarioId;
@@ -37,14 +37,19 @@ public class Pedido {
     @ColumnInfo(name = "notas")
     private String notas;
 
+    // NUEVOS CAMPOS PARA FIREBASE
+    @ColumnInfo(name = "firebase_id")
+    private String firebaseId;
+
+    @ColumnInfo(name = "sincronizado", defaultValue = "0")
+    private boolean sincronizado = false;
+
     @Ignore
     private List<DetallePedido> detalles;
 
-    // Constructor vacío (requerido por Room)
     public Pedido() {
     }
 
-    // Constructor con parámetros
     public Pedido(int numeroMesa, double subtotal, double impuesto, double total, String estado, int usuarioId, String notas) {
         this.numeroMesa = numeroMesa;
         this.fecha = new Date();
@@ -56,7 +61,6 @@ public class Pedido {
         this.notas = notas;
     }
 
-    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -84,11 +88,17 @@ public class Pedido {
     public String getNotas() { return notas; }
     public void setNotas(String notas) { this.notas = notas; }
 
+    public String getFirebaseId() { return firebaseId; }
+    public void setFirebaseId(String firebaseId) { this.firebaseId = firebaseId; }
+
+    public boolean isSincronizado() { return sincronizado; }
+    public void setSincronizado(boolean sincronizado) { this.sincronizado = sincronizado; }
+
     public List<DetallePedido> getDetalles() { return detalles; }
     public void setDetalles(List<DetallePedido> detalles) { this.detalles = detalles; }
 
     public void calcularTotal() {
-        this.impuesto = this.subtotal * 0.13; // 13% impuesto
+        this.impuesto = this.subtotal * 0.13;
         this.total = this.subtotal + this.impuesto;
     }
 }

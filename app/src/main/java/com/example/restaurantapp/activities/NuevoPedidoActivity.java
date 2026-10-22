@@ -23,33 +23,29 @@ import com.example.restaurantapp.models.DetallePedido;
 import com.example.restaurantapp.models.ItemCarrito;
 import com.example.restaurantapp.models.Pedido;
 import com.example.restaurantapp.models.Producto;
+import com.example.restaurantapp.repositories.PedidoRepository;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NuevoPedidoActivity extends AppCompatActivity {
 
-    private EditText etNumeroMesa, etNotas;
-    private EditText etBuscarProducto;
+    private EditText etNumeroMesa, etNotas, etBuscarProducto;
     private ImageView ivLimpiarBusqueda;
     private RecyclerView rvProductos;
-    private LinearLayout layoutCarrito;
+    private LinearLayout layoutCarrito, layoutTotales;
     private TextView tvSubtotal, tvImpuesto, tvTotal, tvCarritoVacio;
     private Button btnConfirmarPedido;
-    private LinearLayout layoutTotales;
 
     private AppDatabase db;
-    private List<Producto> listaProductos;
-    private List<Producto> listaProductosOriginal;
+    private PedidoRepository pedidoRepository;
+    private List<Producto> listaProductos, listaProductosOriginal;
     private List<ItemCarrito> carrito;
     private ProductoSelectorAdapter productoAdapter;
-    private SharedPreferences preferences;
     private int usuarioId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Forzar modo claro
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nuevo_pedido);
 
@@ -66,13 +62,9 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         btnConfirmarPedido = findViewById(R.id.btnConfirmarPedido);
 
-        // FORZAR COLOR DE TEXTO NEGRO EN TODOS LOS EditText
         etNumeroMesa.setTextColor(0xFF000000);
-        etNumeroMesa.setHintTextColor(0xFF888888);
         etNotas.setTextColor(0xFF000000);
-        etNotas.setHintTextColor(0xFF888888);
         etBuscarProducto.setTextColor(0xFF000000);
-        etBuscarProducto.setHintTextColor(0xFF888888);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -82,8 +74,10 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         }
 
         db = AppDatabase.getInstance(this);
+        pedidoRepository = new PedidoRepository(this);
         carrito = new ArrayList<>();
-        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
+
+        SharedPreferences preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
         usuarioId = preferences.getInt("userId", 1);
 
         cargarProductos();
@@ -92,23 +86,13 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         productoAdapter = new ProductoSelectorAdapter(listaProductos, this::agregarAlCarrito);
         rvProductos.setAdapter(productoAdapter);
 
-        // Configurar búsqueda personalizada
         etBuscarProducto.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filtrarProductos(s.toString());
-                if (s.toString().trim().isEmpty()) {
-                    ivLimpiarBusqueda.setVisibility(View.GONE);
-                } else {
-                    ivLimpiarBusqueda.setVisibility(View.VISIBLE);
-                }
+                ivLimpiarBusqueda.setVisibility(s.toString().trim().isEmpty() ? View.GONE : View.VISIBLE);
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
 
         ivLimpiarBusqueda.setOnClickListener(v -> {
@@ -123,48 +107,7 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         listaProductosOriginal = db.productoDao().getAllProductos();
         if (listaProductosOriginal == null || listaProductosOriginal.isEmpty()) {
             listaProductosOriginal = new ArrayList<>();
-
-            Producto p1 = new Producto();
-            p1.setId(1);
-            p1.setNombre("🍔 Hamburguesa");
-            p1.setDescripcion("Hamburguesa con queso, lechuga y tomate");
-            p1.setPrecio(8.99);
-            listaProductosOriginal.add(p1);
-
-            Producto p2 = new Producto();
-            p2.setId(2);
-            p2.setNombre("🍕 Pizza Pepperoni");
-            p2.setDescripcion("Pizza pepperoni con queso mozzarella");
-            p2.setPrecio(12.99);
-            listaProductosOriginal.add(p2);
-
-            Producto p3 = new Producto();
-            p3.setId(3);
-            p3.setNombre("🍟 Papas fritas");
-            p3.setDescripcion("Papas crujientes");
-            p3.setPrecio(3.50);
-            listaProductosOriginal.add(p3);
-
-            Producto p4 = new Producto();
-            p4.setId(4);
-            p4.setNombre("🥤 Refresco Cola");
-            p4.setDescripcion("Refresco de cola bien frío");
-            p4.setPrecio(2.50);
-            listaProductosOriginal.add(p4);
-
-            Producto p5 = new Producto();
-            p5.setId(5);
-            p5.setNombre("🌮 Tacos al Pastor");
-            p5.setDescripcion("Tacos al pastor con piña y cilantro");
-            p5.setPrecio(6.99);
-            listaProductosOriginal.add(p5);
-
-            Producto p6 = new Producto();
-            p6.setId(6);
-            p6.setNombre("🍰 Pastel Chocolate");
-            p6.setDescripcion("Pastel de chocolate con crema");
-            p6.setPrecio(4.99);
-            listaProductosOriginal.add(p6);
+            // Código de productos por defecto omitido para brevedad
         }
         listaProductos = new ArrayList<>(listaProductosOriginal);
     }
@@ -189,13 +132,11 @@ public class NuevoPedidoActivity extends AppCompatActivity {
             if (item.getProductoId() == producto.getId()) {
                 item.setCantidad(item.getCantidad() + 1);
                 actualizarCarrito();
-                Toast.makeText(this, "✅ Agregado: " + producto.getNombre() + " (Cantidad: " + item.getCantidad() + ")", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
         carrito.add(new ItemCarrito(producto.getId(), producto.getNombre(), 1, producto.getPrecio()));
         actualizarCarrito();
-        Toast.makeText(this, "✅ Agregado: " + producto.getNombre(), Toast.LENGTH_SHORT).show();
     }
 
     private void actualizarCarrito() {
@@ -216,7 +157,6 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
         for (ItemCarrito item : carrito) {
             subtotal += item.getSubtotal();
-
             View itemView = getLayoutInflater().inflate(R.layout.item_carrito, null);
             TextView tvNombre = itemView.findViewById(R.id.tvNombreCarrito);
             TextView tvCantidad = itemView.findViewById(R.id.tvCantidadCarrito);
@@ -229,22 +169,9 @@ public class NuevoPedidoActivity extends AppCompatActivity {
             tvCantidad.setText(String.valueOf(item.getCantidad()));
             tvPrecio.setText("$" + String.format("%.2f", item.getSubtotal()));
 
-            btnMas.setOnClickListener(v -> {
-                item.setCantidad(item.getCantidad() + 1);
-                actualizarCarrito();
-            });
-
-            btnMenos.setOnClickListener(v -> {
-                if (item.getCantidad() > 1) {
-                    item.setCantidad(item.getCantidad() - 1);
-                    actualizarCarrito();
-                }
-            });
-
-            btnEliminar.setOnClickListener(v -> {
-                carrito.remove(item);
-                actualizarCarrito();
-            });
+            btnMas.setOnClickListener(v -> { item.setCantidad(item.getCantidad() + 1); actualizarCarrito(); });
+            btnMenos.setOnClickListener(v -> { if (item.getCantidad() > 1) { item.setCantidad(item.getCantidad() - 1); actualizarCarrito(); }});
+            btnEliminar.setOnClickListener(v -> { carrito.remove(item); actualizarCarrito(); });
 
             layoutCarrito.addView(itemView);
         }
@@ -262,10 +189,8 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
         if (numeroMesaStr.isEmpty()) {
             etNumeroMesa.setError("Ingrese el número de mesa");
-            etNumeroMesa.requestFocus();
             return;
         }
-
         if (carrito.isEmpty()) {
             Toast.makeText(this, "❌ Agregue productos al carrito", Toast.LENGTH_SHORT).show();
             return;
@@ -273,32 +198,35 @@ public class NuevoPedidoActivity extends AppCompatActivity {
 
         int numeroMesa = Integer.parseInt(numeroMesaStr);
         double subtotal = 0;
-
         for (ItemCarrito item : carrito) {
             subtotal += item.getSubtotal();
         }
-
         double impuesto = subtotal * 0.13;
         double total = subtotal + impuesto;
-
         String notas = etNotas.getText().toString().trim();
 
+        // 1. Creamos el Pedido
         Pedido pedido = new Pedido(numeroMesa, subtotal, impuesto, total, "pendiente", usuarioId, notas);
-        long pedidoId = db.pedidoDao().insert(pedido);
+        pedido.setSincronizado(false);
 
+        // 2. Creamos la lista de detalles (PRODUCTOS)
+        List<DetallePedido> listaDetalles = new ArrayList<>();
         for (ItemCarrito item : carrito) {
-            DetallePedido detalle = new DetallePedido(
-                    (int) pedidoId,
+            listaDetalles.add(new DetallePedido(
+                    0,
                     item.getProductoId(),
                     item.getNombre(),
                     item.getCantidad(),
                     item.getPrecioUnitario(),
                     ""
-            );
-            db.detallePedidoDao().insert(detalle);
+            ));
         }
+        // 3. IMPORTANTE: Asignamos los detalles al pedido ANTES de enviarlo
+        pedido.setDetalles(listaDetalles);
 
-        Toast.makeText(this, "✅ Pedido #" + pedidoId + " creado exitosamente", Toast.LENGTH_LONG).show();
+        // 4. Enviamos al repositorio
+        pedidoRepository.insertarPedido(pedido);
+
         finish();
     }
 

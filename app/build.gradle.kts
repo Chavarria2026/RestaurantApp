@@ -1,15 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
+    // AÑADE ESTA LÍNEA AQUÍ:
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.restaurantapp"
-    compileSdk = 36  // ← CAMBIAR de 35 a 36
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.restaurantapp"
         minSdk = 24
-        targetSdk = 36  // ← CAMBIAR de 35 a 36
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -25,12 +27,10 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     buildFeatures {
         viewBinding = true
     }
@@ -59,4 +59,11 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.cardview:cardview:1.0.0")
+
+    // ==========================================
+    // DEPENDENCIAS DE FIREBASE (AÑADIDAS)
+    // ==========================================
+    implementation(platform("com.google.firebase:firebase-bom:35.0.2"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 }

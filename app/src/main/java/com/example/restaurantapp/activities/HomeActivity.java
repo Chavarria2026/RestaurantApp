@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +16,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.restaurantapp.R;
 import com.example.restaurantapp.fragments.InicioFragment;
+import com.example.restaurantapp.fragments.MapaFragment; // <--- IMPORT NUEVO
 import com.example.restaurantapp.fragments.MenuFragment;
 import com.example.restaurantapp.fragments.PedidosFragment;
 import com.example.restaurantapp.fragments.PerfilFragment;
@@ -77,7 +77,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 }
                 return true;
             } else if (itemId == R.id.nav_perfil) {
-                cargarFragment(PerfilFragment.newInstance(usuarioLogueado));
+                cargarFragment(new PerfilFragment());
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle("Perfil");
                 }
@@ -129,9 +129,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 getSupportActionBar().setTitle("Ventas");
             }
         } else if (id == R.id.nav_perfil) {
-            cargarFragment(PerfilFragment.newInstance(usuarioLogueado));
+            cargarFragment(new PerfilFragment());
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Perfil");
+            }
+        } else if (id == R.id.nav_mapa) { // <--- NUEVO BLOQUE PARA EL MAPA
+            cargarFragment(new MapaFragment());
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Ubicación");
             }
         } else if (id == R.id.nav_config) {
             Intent intent = new Intent(this, ConfiguracionActivity.class);

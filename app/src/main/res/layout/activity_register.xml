@@ -12,69 +12,64 @@
         android:padding="32dp"
         android:gravity="center">
 
-        <!-- Título -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Crear Cuenta"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
+            android:textColor="#FFFFFF"
             android:layout_marginBottom="32dp" />
 
-        <!-- Campo Usuario -->
+        <!-- Inputs en color negro -->
         <EditText
-            android:id="@+id/etUsuario"
+            android:id="@+id/etNombreCompleto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/usuario"
-            android:inputType="text"
+            android:hint="Nombre Completo (min. 7 letras)"
+            android:inputType="textPersonName"
             android:padding="14dp"
             android:layout_marginBottom="12dp"
             android:background="@drawable/edittext_background"
-            android:textColorHint="#B3FFFFFF"
-            android:textColor="@color/white" />
+            android:textColorHint="#888888"
+            android:textColor="#000000" />
 
-        <!-- Campo Email -->
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/email"
+            android:hint="Correo Electrónico"
             android:inputType="textEmailAddress"
             android:padding="14dp"
             android:layout_marginBottom="12dp"
             android:background="@drawable/edittext_background"
-            android:textColorHint="#B3FFFFFF"
-            android:textColor="@color/white" />
+            android:textColorHint="#888888"
+            android:textColor="#000000" />
 
-        <!-- Campo Contraseña -->
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password"
+            android:hint="Contraseña (min. 8, letras y números)"
             android:inputType="textPassword"
             android:padding="14dp"
             android:layout_marginBottom="12dp"
             android:background="@drawable/edittext_background"
-            android:textColorHint="#B3FFFFFF"
-            android:textColor="@color/white" />
+            android:textColorHint="#888888"
+            android:textColor="#000000" />
 
-        <!-- Campo Confirmar Contraseña -->
         <EditText
             android:id="@+id/etConfirmPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/confirm_password"
+            android:hint="Confirmar Contraseña"
             android:inputType="textPassword"
             android:padding="14dp"
             android:layout_marginBottom="32dp"
             android:background="@drawable/edittext_background"
-            android:textColorHint="#B3FFFFFF"
-            android:textColor="@color/white" />
+            android:textColorHint="#888888"
+            android:textColor="#000000" />
 
-        <!-- Botones -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,7 +85,7 @@
                 android:textStyle="bold"
                 android:layout_marginEnd="20dp"
                 android:background="@drawable/button_primary"
-                android:textColor="@color/primary" />
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/btnRegresar"
@@ -100,7 +95,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:background="@drawable/button_secondary"
-                android:textColor="@color/white" />
+                android:textColor="#FFFFFF" />
 
         </LinearLayout>
 

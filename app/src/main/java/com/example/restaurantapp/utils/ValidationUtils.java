@@ -17,9 +17,14 @@ public class ValidationUtils {
         return username != null && username.length() >= 3;
     }
 
-    // Validar contraseña (mínimo 5 caracteres, letras y números)
+    // Validar nombre completo (mínimo 7 caracteres según el PDF)
+    public static boolean isValidFullName(String name) {
+        return name != null && name.length() >= 7;
+    }
+
+    // Validar contraseña (mínimo 8 caracteres, letras y números según el PDF)
     public static boolean isValidPassword(String password) {
-        if (password == null || password.length() < 5) {
+        if (password == null || password.length() < 8) {
             return false;
         }
         return password.matches(".*[A-Za-z].*") && password.matches(".*\\d.*");

@@ -54,6 +54,13 @@ public interface PedidoDao {
     @Query("UPDATE pedidos SET estado = :estado WHERE id = :id")
     void actualizarEstado(int id, String estado);
 
+    // NUEVOS MÉTODOS PARA SINCRONIZACIÓN
+    @Query("SELECT * FROM pedidos WHERE sincronizado = 0")
+    List<Pedido> getPedidosNoSincronizados();
+
+    @Query("UPDATE pedidos SET sincronizado = 1, firebase_id = :firebaseId WHERE id = :pedidoId")
+    void marcarPedidoComoSincronizado(int pedidoId, String firebaseId);
+
     @Query("DELETE FROM pedidos")
     void deleteAll();
 }

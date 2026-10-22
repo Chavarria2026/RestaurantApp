@@ -22,6 +22,10 @@ public class Usuario {
     @ColumnInfo(name = "rol")
     private String rol; // dueño, cajero, mesero
 
+    // NUEVO CAMPO PARA SINCRONIZACIÓN
+    @ColumnInfo(name = "sincronizado", defaultValue = "1")
+    private boolean sincronizado = true;
+
     // Constructor vacío (requerido por Room)
     public Usuario() {
     }
@@ -44,45 +48,24 @@ public class Usuario {
     }
 
     // Getters y Setters
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRol() {
-        return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
+    // NUEVOS GETTER Y SETTER
+    public boolean isSincronizado() { return sincronizado; }
+    public void setSincronizado(boolean sincronizado) { this.sincronizado = sincronizado; }
 
     @Override
     public String toString() {

@@ -26,6 +26,13 @@
             android:id="@+id/nav_perfil"
             android:icon="@drawable/ic_perfil"
             android:title="Perfil" />
+
+        <!-- NUEVA OPCIÓN DEL MAPA -->
+        <item
+            android:id="@+id/nav_mapa"
+            android:icon="@android:drawable/ic_dialog_map"
+            android:title="📍 Ubicación" />
+
     </group>
 
     <item android:title="Opciones">

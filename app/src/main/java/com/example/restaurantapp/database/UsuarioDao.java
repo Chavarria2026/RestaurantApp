@@ -35,14 +35,21 @@ public interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE email = :email")
     Usuario getUsuarioByEmail(String email);
 
-    @Query("SELECT * FROM usuarios WHERE nombre = :nombre AND password = :password")
-    Usuario login(String nombre, String password);
+    @Query("SELECT * FROM usuarios WHERE email = :email AND password = :password")
+    Usuario login(String email, String password); // Cambiado de nombre a email para que coincida con LoginActivity
 
     @Query("SELECT * FROM usuarios WHERE rol = :rol")
     List<Usuario> getUsuariosByRol(String rol);
 
     @Query("SELECT COUNT(*) > 0 FROM usuarios WHERE nombre = :nombre")
     boolean existeUsuario(String nombre);
+
+    // NUEVAS CONSULTAS PARA SINCRONIZACIÓN (FASE 3)
+    @Query("SELECT * FROM usuarios WHERE sincronizado = 0")
+    List<Usuario> getUsuariosNoSincronizados();
+
+    @Query("UPDATE usuarios SET sincronizado = 1 WHERE email = :email")
+    void marcarComoSincronizado(String email);
 
     @Query("DELETE FROM usuarios")
     void deleteAll();

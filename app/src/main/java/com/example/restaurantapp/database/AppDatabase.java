@@ -12,7 +12,7 @@ import com.example.restaurantapp.models.Usuario;
 
 @Database(
         entities = {Usuario.class, Producto.class, Pedido.class, DetallePedido.class},
-        version = 2,
+        version = 3, // <--- AQUÍ ESTÁ EL CAMBIO (antes era 2)
         exportSchema = false
 )
 @TypeConverters({Converters.class})
@@ -31,7 +31,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "restaurant_database"
-                    ).fallbackToDestructiveMigration() // Permite migración cuando cambia versión
+                    ).fallbackToDestructiveMigration() // Esto borrará los datos viejos y creará la tabla nueva
                     .allowMainThreadQueries()
                     .build();
         }

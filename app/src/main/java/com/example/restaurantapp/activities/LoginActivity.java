@@ -9,67 +9,121 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import com.example.restaurantapp.R;
+import com.example.restaurantapp.database.AppDatabase;
+import com.example.restaurantapp.models.Usuario;
+import com.example.restaurantapp.utils.NetworkUtils;
+import com.example.restaurantapp.utils.ValidationUtils;
+import com.google.android.material.chip.Chip;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etUsuario, etPassword;
+    private EditText etEmail, etPassword;
     private Button btnLogin, btnRegister;
+    private Chip chipRecordar;
     private SharedPreferences preferences;
+    private FirebaseAuth mAuth;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Forzar modo claro
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        etUsuario = findViewById(R.id.etUsuario);
+        // INICIALIZAMOS CON LOS NOMBRES DEL NUEVO XML
+        etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
+        chipRecordar = findViewById(R.id.chipRecordar);
 
-        // FORZAR COLOR DE TEXTO NEGRO
-        etUsuario.setTextColor(0xFF000000);
-        etUsuario.setHintTextColor(0xFF888888);
+        // Forzar color de texto negro por si el fondo es blanco
+        etEmail.setTextColor(0xFF000000);
         etPassword.setTextColor(0xFF000000);
-        etPassword.setHintTextColor(0xFF888888);
 
         preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
+        db = AppDatabase.getInstance(this);
 
+        // Si ya hay sesión activa, ir directo al Home
         if (preferences.getBoolean("isLoggedIn", false)) {
             startActivity(new Intent(this, HomeActivity.class));
             finish();
+            return;
         }
 
-        btnLogin.setOnClickListener(v -> {
-            String usuario = etUsuario.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
+        // Cargar credenciales si el Chip estaba activo
+        if (preferences.getBoolean("recordar", false)) {
+            etEmail.setText(preferences.getString("savedEmail", ""));
+            etPassword.setText(preferences.getString("savedPassword", ""));
+            chipRecordar.setChecked(true);
+        }
 
-            if (usuario.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Complete todos los campos", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        btnLogin.setOnClickListener(v -> intentarLogin());
+        btnRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
+    }
 
-            String savedUser = preferences.getString("usuario", "");
-            String savedPass = preferences.getString("password", "");
+    private void intentarLogin() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-            if (usuario.equals(savedUser) && password.equals(savedPass)) {
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("isLoggedIn", true);
-                editor.putString("loggedUser", usuario);
-                editor.apply();
+        if (!ValidationUtils.isValidEmail(email)) {
+            etEmail.setError("Correo inválido");
+            return;
+        }
+        if (!ValidationUtils.isValidPassword(password)) {
+            etPassword.setError("Mínimo 8 caracteres (letras y números)");
+            return;
+        }
 
-                Toast.makeText(this, "✅ Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, HomeActivity.class));
-                finish();
-            } else {
-                Toast.makeText(this, "❌ Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (NetworkUtils.isNetworkAvailable(this)) {
+            // LOGIN CON FIREBASE
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            guardarSesion(email, password);
+                        } else {
+                            // Si falla en Firebase, intentamos con Room (por si acaso)
+                            intentarLoginLocal(email, password);
+                        }
+                    });
+        } else {
+            // LOGIN SIN INTERNET (Local Room)
+            intentarLoginLocal(email, password);
+        }
+    }
 
-        btnRegister.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegisterActivity.class));
-        });
+    private void intentarLoginLocal(String email, String password) {
+        Usuario user = db.usuarioDao().login(email, password);
+        if (user != null) {
+            guardarSesion(email, password);
+            Toast.makeText(this, "Modo Offline: Login Local exitoso", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "❌ Credenciales incorrectas", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void guardarSesion(String email, String password) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("isLoggedIn", true);
+        editor.putString("loggedUser", email); // Usamos email como identificador
+        editor.putString("email", email);
+
+        // Guardar credenciales si el Chip está activo
+        if (chipRecordar.isChecked()) {
+            editor.putBoolean("recordar", true);
+            editor.putString("savedEmail", email);
+            editor.putString("savedPassword", password);
+        } else {
+            editor.putBoolean("recordar", false);
+            editor.remove("savedEmail");
+            editor.remove("savedPassword");
+        }
+        editor.apply();
+
+        Toast.makeText(this, "✅ Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, HomeActivity.class));
+        finish();
     }
 }
