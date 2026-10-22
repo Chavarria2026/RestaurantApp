@@ -1,7 +1,6 @@
 package com.example.restaurantapp.repositories;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 import com.example.restaurantapp.database.AppDatabase;
 import com.example.restaurantapp.models.DetallePedido;
@@ -37,13 +36,13 @@ public class PedidoRepository {
         }
 
         if (NetworkUtils.isNetworkAvailable(context)) {
-            subirPedidoAFirestore(pedido, false);
+            subirPedidoAFirestore(pedido, false, null); // null porque no necesita avisar a nadie
         } else {
             Toast.makeText(context, "📶 Guardado localmente (Pendiente de sincronizar)", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void subirPedidoAFirestore(Pedido pedido, boolean esSincronizacionMasiva) {
+    private void subirPedidoAFirestore(Pedido pedido, boolean esSincronizacionMasiva, Runnable onComplete) {
         Map<String, Object> pedidoMap = new HashMap<>();
         pedidoMap.put("numeroMesa", pedido.getNumeroMesa());
 
@@ -57,17 +56,12 @@ public class PedidoRepository {
         pedidoMap.put("usuarioId", pedido.getUsuarioId());
         pedidoMap.put("notas", pedido.getNotas());
 
-        // CONVERTIR LA LISTA DE PRODUCTOS A UNA LISTA DE MAPAS
         List<Map<String, Object>> listaProductosMap = new ArrayList<>();
         List<DetallePedido> detalles = pedido.getDetalles();
 
-        // Si la lista viene vacía (por ejemplo, en la sincronización), la buscamos en Room
         if (detalles == null || detalles.isEmpty()) {
             detalles = dbLocal.detallePedidoDao().getDetallesByPedido(pedido.getId());
         }
-
-        // Imprimimos en Logcat para depurar
-        Log.d("FIREBASE_DEBUG", "Cantidad de productos a subir: " + (detalles != null ? detalles.size() : "null"));
 
         if (detalles != null && !detalles.isEmpty()) {
             for (DetallePedido detalle : detalles) {
@@ -80,8 +74,6 @@ public class PedidoRepository {
                 listaProductosMap.add(detMap);
             }
         }
-
-        // Asignamos la lista al documento principal
         pedidoMap.put("productos", listaProductosMap);
 
         dbFirestore.collection("pedidos").add(pedidoMap)
@@ -91,11 +83,13 @@ public class PedidoRepository {
                     if (!esSincronizacionMasiva) {
                         Toast.makeText(context, "✅ Pedido guardado en Nube y Local", Toast.LENGTH_SHORT).show();
                     }
+                    if (onComplete != null) onComplete.run(); // Avisamos que terminó
                 })
                 .addOnFailureListener(e -> {
                     if (!esSincronizacionMasiva) {
                         Toast.makeText(context, "⚠️ Error en nube. Guardado solo en local.", Toast.LENGTH_SHORT).show();
                     }
+                    if (onComplete != null) onComplete.run(); // Avisamos que terminó (aunque haya fallado)
                 });
     }
 
@@ -107,10 +101,18 @@ public class PedidoRepository {
             return;
         }
 
+        int totalPendientes = pendientes.size();
+        final int[] completados = {0}; // Contador para saber cuántos han terminado
+
         for (Pedido pedido : pendientes) {
-            subirPedidoAFirestore(pedido, true);
+            subirPedidoAFirestore(pedido, true, () -> {
+                completados[0]++;
+                // Cuando el último pedido termine de subir, avisamos a la interfaz
+                if (completados[0] == totalPendientes) {
+                    listener.onSyncFinished(totalPendientes);
+                }
+            });
         }
-        listener.onSyncFinished(pendientes.size());
     }
 
     public interface OnSyncCompleteListener {
