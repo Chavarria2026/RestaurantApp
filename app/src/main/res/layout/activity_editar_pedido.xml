@@ -1,231 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F8F9FA"
-    android:fitsSystemWindows="true">
+    android:fillViewport="true"
+    android:background="#F5F5F5">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#FF5722"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:elevation="4dp"
-        android:titleTextColor="#FFFFFF"
-        android:title="✏️ Editar Pedido" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        <!-- Notas del pedido -->
+        <EditText
+            android:id="@+id/etNotas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Notas del pedido (ej. sin cebolla)"
+            android:background="@android:drawable/editbox_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:textColor="#000000"
+            android:textColorHint="#888888"/>
 
+        <!-- Botón para mostrar/ocultar productos -->
+        <Button
+            android:id="@+id/btnAgregarProductos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="➕ Agregar Productos"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- LISTA DE PRODUCTOS (Con altura fija y scroll interno) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvProductos"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:nestedScrollingEnabled="true"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"
+            android:background="#FFFFFF"
+            android:elevation="2dp"/>
+
+        <!-- Título del carrito -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛒 Carrito Actual"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Texto vacío -->
+        <TextView
+            android:id="@+id/tvCarritoVacio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="El carrito está vacío"
+            android:textColor="#999999"
+            android:gravity="center"
+            android:padding="20dp"
+            android:visibility="gone"/>
+
+        <!-- Contenedor dinámico del carrito -->
         <LinearLayout
+            android:id="@+id/layoutCarrito"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Totales -->
+        <LinearLayout
+            android:id="@+id/layoutTotales"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#FFFFFF"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp"
-                android:elevation="2dp">
-
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
                 <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Subtotal:"
+                    android:textColor="#666666"/>
+                <TextView
+                    android:id="@+id/tvSubtotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📝 NOTAS"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="#FF5722"
-                    android:layout_marginBottom="12dp" />
-
-                <EditText
-                    android:id="@+id/etNotas"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Notas adicionales"
-                    android:inputType="text"
-                    android:padding="12dp"
-                    android:background="@drawable/edittext_background"
-                    android:textSize="14sp" />
-
+                    android:text="$0.00"
+                    android:textColor="#333333"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#FFFFFF"
-                android:padding="16dp"
-                android:layout_marginBottom="16dp"
-                android:elevation="2dp">
-
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
                 <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Impuesto (13%):"
+                    android:textColor="#666666"/>
+                <TextView
+                    android:id="@+id/tvImpuesto"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🍕 AGREGAR PRODUCTOS"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="#FF5722"
-                    android:layout_marginBottom="12dp" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvProductos"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/btnAgregarProductos"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:text="➕ Agregar Productos"
-                    android:background="#2196F3"
-                    android:textColor="#FFFFFF"
-                    android:layout_marginTop="8dp" />
-
+                    android:text="$0.00"
+                    android:textColor="#333333"/>
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginVertical="8dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#FFFFFF"
-                android:padding="16dp"
-                android:elevation="2dp">
-
+                android:orientation="horizontal">
                 <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="TOTAL:"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"/>
+                <TextView
+                    android:id="@+id/tvTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🛒 PRODUCTOS EN EL PEDIDO"
-                    android:textSize="14sp"
+                    android:text="$0.00"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#FF5722"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:id="@+id/tvCarritoVacio"
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp"
-                    android:text="No hay productos en el pedido"
-                    android:textSize="14sp"
-                    android:textColor="#999999"
-                    android:gravity="center"
-                    android:background="#F5F5F5"
-                    android:padding="20dp" />
-
-                <LinearLayout
-                    android:id="@+id/layoutCarrito"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/layoutTotales"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    android:layout_marginTop="16dp">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="#FF5722"
-                        android:layout_marginVertical="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Subtotal"
-                            android:textSize="14sp" />
-                        <TextView
-                            android:id="@+id/tvSubtotal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="$0.00"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Impuesto (13%)"
-                            android:textSize="14sp" />
-                        <TextView
-                            android:id="@+id/tvImpuesto"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="$0.00"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="8dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="TOTAL"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="#FF5722" />
-                        <TextView
-                            android:id="@+id/tvTotal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="$0.00"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="#FF5722" />
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btnGuardarCambios"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="💾 GUARDAR CAMBIOS"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:background="#FF5722"
-                        android:textColor="#FFFFFF" />
-
-                </LinearLayout>
-
+                    android:textColor="#4CAF50"/>
             </LinearLayout>
-
         </LinearLayout>
 
-    </ScrollView>
+        <!-- Botón Guardar -->
+        <Button
+            android:id="@+id/btnGuardarCambios"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💾 Guardar Cambios"
+            android:backgroundTint="#FF5722"
+            android:textColor="#FFFFFF"
+            android:padding="14dp"/>
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

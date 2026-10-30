@@ -18,6 +18,13 @@
             android:id="@+id/nav_pedidos"
             android:icon="@android:drawable/ic_menu_edit"
             android:title="Mis Pedidos" />
+
+        <!-- NUEVO: MODO COCINA -->
+        <item
+            android:id="@+id/nav_cocina"
+            android:icon="@android:drawable/ic_menu_compass"
+            android:title="👨‍🍳 Modo Cocina" />
+
         <item
             android:id="@+id/nav_ventas"
             android:icon="@android:drawable/ic_menu_report_image"
@@ -27,7 +34,7 @@
             android:icon="@drawable/ic_perfil"
             android:title="Perfil" />
 
-        <!-- NUEVA OPCIÓN DEL MAPA -->
+        <!-- OPCIÓN DEL MAPA -->
         <item
             android:id="@+id/nav_mapa"
             android:icon="@android:drawable/ic_dialog_map"

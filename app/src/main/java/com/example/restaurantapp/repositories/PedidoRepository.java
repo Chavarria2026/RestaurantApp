@@ -1,6 +1,7 @@
 package com.example.restaurantapp.repositories;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 import com.example.restaurantapp.database.AppDatabase;
 import com.example.restaurantapp.models.DetallePedido;
@@ -36,13 +37,61 @@ public class PedidoRepository {
         }
 
         if (NetworkUtils.isNetworkAvailable(context)) {
-            subirPedidoAFirestore(pedido, false, null); // null porque no necesita avisar a nadie
+            subirPedidoAFirestore(pedido, false, null);
         } else {
             Toast.makeText(context, "📶 Guardado localmente (Pendiente de sincronizar)", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void subirPedidoAFirestore(Pedido pedido, boolean esSincronizacionMasiva, Runnable onComplete) {
+        Map<String, Object> pedidoMap = crearMapaPedido(pedido);
+
+        dbFirestore.collection("pedidos").add(pedidoMap)
+                .addOnSuccessListener(documentReference -> {
+                    String firebaseId = documentReference.getId();
+                    dbLocal.pedidoDao().marcarPedidoComoSincronizado(pedido.getId(), firebaseId);
+                    if (!esSincronizacionMasiva) {
+                        Toast.makeText(context, "✅ Pedido guardado en Nube y Local", Toast.LENGTH_SHORT).show();
+                    }
+                    if (onComplete != null) onComplete.run();
+                })
+                .addOnFailureListener(e -> {
+                    if (!esSincronizacionMasiva) {
+                        Toast.makeText(context, "⚠️ Error en nube. Guardado solo en local.", Toast.LENGTH_SHORT).show();
+                    }
+                    if (onComplete != null) onComplete.run();
+                });
+    }
+
+    // --- NUEVO MÉTODO PARA ACTUALIZAR EL ESTADO ---
+    public void actualizarEstadoEnFirestore(Pedido pedido) {
+        if (pedido.getFirebaseId() != null && !pedido.getFirebaseId().isEmpty()) {
+            dbFirestore.collection("pedidos").document(pedido.getFirebaseId())
+                    .update("estado", pedido.getEstado())
+                    .addOnSuccessListener(aVoid -> Log.d("FIREBASE_SYNC", "Estado actualizado en la nube a: " + pedido.getEstado()))
+                    .addOnFailureListener(e -> Log.e("FIREBASE_SYNC", "Error actualizando estado en la nube", e));
+        }
+    }
+
+    // --- NUEVO MÉTODO PARA ACTUALIZAR EL PEDIDO COMPLETO (EDICIÓN) ---
+    public void actualizarPedidoEnFirestore(Pedido pedido) {
+        if (pedido.getFirebaseId() != null && !pedido.getFirebaseId().isEmpty()) {
+            Map<String, Object> pedidoMap = crearMapaPedido(pedido);
+            // Usamos set() para reemplazar los datos, ya que cambió el arreglo de productos
+            dbFirestore.collection("pedidos").document(pedido.getFirebaseId())
+                    .set(pedidoMap)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("FIREBASE_SYNC", "Pedido editado actualizado en Firestore");
+                        Toast.makeText(context, "✅ Pedido actualizado en la Nube", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> Log.e("FIREBASE_SYNC", "Error actualizando pedido en Firestore", e));
+        } else {
+            // Si no tiene firebaseId (se creó offline), lo subimos como nuevo
+            subirPedidoAFirestore(pedido, false, null);
+        }
+    }
+
+    private Map<String, Object> crearMapaPedido(Pedido pedido) {
         Map<String, Object> pedidoMap = new HashMap<>();
         pedidoMap.put("numeroMesa", pedido.getNumeroMesa());
 
@@ -76,21 +125,7 @@ public class PedidoRepository {
         }
         pedidoMap.put("productos", listaProductosMap);
 
-        dbFirestore.collection("pedidos").add(pedidoMap)
-                .addOnSuccessListener(documentReference -> {
-                    String firebaseId = documentReference.getId();
-                    dbLocal.pedidoDao().marcarPedidoComoSincronizado(pedido.getId(), firebaseId);
-                    if (!esSincronizacionMasiva) {
-                        Toast.makeText(context, "✅ Pedido guardado en Nube y Local", Toast.LENGTH_SHORT).show();
-                    }
-                    if (onComplete != null) onComplete.run(); // Avisamos que terminó
-                })
-                .addOnFailureListener(e -> {
-                    if (!esSincronizacionMasiva) {
-                        Toast.makeText(context, "⚠️ Error en nube. Guardado solo en local.", Toast.LENGTH_SHORT).show();
-                    }
-                    if (onComplete != null) onComplete.run(); // Avisamos que terminó (aunque haya fallado)
-                });
+        return pedidoMap;
     }
 
     public void sincronizarPendientes(OnSyncCompleteListener listener) {
@@ -102,12 +137,11 @@ public class PedidoRepository {
         }
 
         int totalPendientes = pendientes.size();
-        final int[] completados = {0}; // Contador para saber cuántos han terminado
+        final int[] completados = {0};
 
         for (Pedido pedido : pendientes) {
             subirPedidoAFirestore(pedido, true, () -> {
                 completados[0]++;
-                // Cuando el último pedido termine de subir, avisamos a la interfaz
                 if (completados[0] == totalPendientes) {
                     listener.onSyncFinished(totalPendientes);
                 }

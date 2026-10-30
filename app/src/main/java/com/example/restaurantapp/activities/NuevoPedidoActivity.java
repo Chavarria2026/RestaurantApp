@@ -107,7 +107,6 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         listaProductosOriginal = db.productoDao().getAllProductos();
         if (listaProductosOriginal == null || listaProductosOriginal.isEmpty()) {
             listaProductosOriginal = new ArrayList<>();
-            // Código de productos por defecto omitido para brevedad
         }
         listaProductos = new ArrayList<>(listaProductosOriginal);
     }
@@ -205,11 +204,9 @@ public class NuevoPedidoActivity extends AppCompatActivity {
         double total = subtotal + impuesto;
         String notas = etNotas.getText().toString().trim();
 
-        // 1. Creamos el Pedido
         Pedido pedido = new Pedido(numeroMesa, subtotal, impuesto, total, "pendiente", usuarioId, notas);
         pedido.setSincronizado(false);
 
-        // 2. Creamos la lista de detalles (PRODUCTOS)
         List<DetallePedido> listaDetalles = new ArrayList<>();
         for (ItemCarrito item : carrito) {
             listaDetalles.add(new DetallePedido(
@@ -221,12 +218,9 @@ public class NuevoPedidoActivity extends AppCompatActivity {
                     ""
             ));
         }
-        // 3. IMPORTANTE: Asignamos los detalles al pedido ANTES de enviarlo
         pedido.setDetalles(listaDetalles);
 
-        // 4. Enviamos al repositorio
         pedidoRepository.insertarPedido(pedido);
-
         finish();
     }
 

@@ -2,10 +2,7 @@ package com.example.restaurantapp.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,14 +18,15 @@ import com.example.restaurantapp.R;
 import com.example.restaurantapp.activities.EditarPedidoActivity;
 import com.example.restaurantapp.database.AppDatabase;
 import com.example.restaurantapp.models.Pedido;
+import com.example.restaurantapp.repositories.PedidoRepository;
 import java.util.List;
 
 public class PedidosFragment extends Fragment {
 
     private LinearLayout layoutPedidos;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private SharedPreferences preferences;
     private AppDatabase db;
+    private PedidoRepository pedidoRepository; // NUEVO
 
     @Nullable
     @Override
@@ -38,16 +36,13 @@ public class PedidosFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
 
         db = AppDatabase.getInstance(requireContext());
-        preferences = requireContext().getSharedPreferences("RestaurantPrefs", 0);
+        pedidoRepository = new PedidoRepository(requireContext()); // NUEVO
 
         cargarPedidos();
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
             cargarPedidos();
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(getContext(), "✅ Pedidos actualizados", Toast.LENGTH_SHORT).show();
-            }, 1000);
+            swipeRefreshLayout.setRefreshing(false);
         });
 
         return view;
@@ -55,7 +50,6 @@ public class PedidosFragment extends Fragment {
 
     private void cargarPedidos() {
         layoutPedidos.removeAllViews();
-
         List<Pedido> pedidos = db.pedidoDao().getAllPedidos();
 
         if (pedidos == null || pedidos.isEmpty()) {
@@ -81,122 +75,73 @@ public class PedidosFragment extends Fragment {
         card.setBackgroundColor(0xFFF5F5F5);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, 0, 15);
         card.setLayoutParams(params);
 
-        // ID del pedido
         TextView tvId = new TextView(getContext());
-        tvId.setText("🆔 Pedido #" + pedido.getId());
+        tvId.setText("🆔 Pedido #" + pedido.getId() + " | 🍽️ Mesa: " + pedido.getNumeroMesa());
         tvId.setTextSize(16);
         tvId.setTextColor(0xFF333333);
         tvId.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Mesa
-        TextView tvMesa = new TextView(getContext());
-        tvMesa.setText("🍽️ Mesa: " + pedido.getNumeroMesa());
-        tvMesa.setTextSize(14);
-        tvMesa.setTextColor(0xFF666666);
-
-        // Total
         TextView tvTotal = new TextView(getContext());
         tvTotal.setText("💰 Total: $" + String.format("%.2f", pedido.getTotal()));
-        tvTotal.setTextSize(15);
         tvTotal.setTextColor(0xFF4CAF50);
-        tvTotal.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Estado
         TextView tvEstado = new TextView(getContext());
         String estado = pedido.getEstado();
         tvEstado.setText("📌 Estado: " + getEstadoTexto(estado));
-        tvEstado.setTextSize(14);
         tvEstado.setTextColor(getEstadoColor(estado));
+        tvEstado.setPadding(0, 5, 0, 10);
 
-        // Layout de botones
         LinearLayout layoutBotones = new LinearLayout(getContext());
         layoutBotones.setOrientation(LinearLayout.HORIZONTAL);
-        layoutBotones.setPadding(0, 15, 0, 0);
 
-        // Botón EDITAR (solo si está pendiente)
         if (estado.equals("pendiente")) {
             Button btnEditar = new Button(getContext());
             btnEditar.setText("✏️ Editar");
             btnEditar.setBackgroundColor(0xFF2196F3);
             btnEditar.setTextColor(0xFFFFFFFF);
-            btnEditar.setPadding(16, 8, 16, 8);
-
-            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
-            );
-            btnParams.setMargins(0, 0, 8, 0);
-            btnEditar.setLayoutParams(btnParams);
-
+            LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+            p.setMargins(0, 0, 8, 0);
+            btnEditar.setLayoutParams(p);
             btnEditar.setOnClickListener(v -> {
                 Intent intent = new Intent(getContext(), EditarPedidoActivity.class);
                 intent.putExtra("pedido_id", pedido.getId());
                 startActivity(intent);
             });
             layoutBotones.addView(btnEditar);
-        }
 
-        // Botón CANCELAR (solo si no está cancelado ni pagado)
-        if (!estado.equals("cancelado") && !estado.equals("pagado")) {
             Button btnCancelar = new Button(getContext());
             btnCancelar.setText("❌ Cancelar");
             btnCancelar.setBackgroundColor(0xFFF44336);
             btnCancelar.setTextColor(0xFFFFFFFF);
-            btnCancelar.setPadding(16, 8, 16, 8);
-
-            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
-            );
-            btnParams.setMargins(8, 0, 8, 0);
-            btnCancelar.setLayoutParams(btnParams);
-
+            LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+            btnCancelar.setLayoutParams(p2);
             btnCancelar.setOnClickListener(v -> confirmarCancelar(pedido));
             layoutBotones.addView(btnCancelar);
         }
 
-        // Botón ENTREGAR (solo si está pendiente)
         if (estado.equals("pendiente")) {
-            Button btnEntregar = new Button(getContext());
-            btnEntregar.setText("✅ Entregar");
-            btnEntregar.setBackgroundColor(0xFF4CAF50);
-            btnEntregar.setTextColor(0xFFFFFFFF);
-            btnEntregar.setPadding(16, 8, 16, 8);
-
-            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
-            );
-            btnParams.setMargins(8, 0, 0, 0);
-            btnEntregar.setLayoutParams(btnParams);
-
-            btnEntregar.setOnClickListener(v -> cambiarEstado(pedido, "entregado"));
-            layoutBotones.addView(btnEntregar);
+            Button btnCocina = new Button(getContext());
+            btnCocina.setText("👨‍🍳 A Cocina");
+            btnCocina.setBackgroundColor(0xFFFF9800);
+            btnCocina.setTextColor(0xFFFFFFFF);
+            btnCocina.setOnClickListener(v -> cambiarEstado(pedido, "preparacion"));
+            layoutBotones.addView(btnCocina);
         }
 
-        // Botón PAGAR (solo si está entregado) - aparece automáticamente
-        if (estado.equals("entregado")) {
+        if (estado.equals("listo")) {
             Button btnPagar = new Button(getContext());
             btnPagar.setText("💰 Pagar");
-            btnPagar.setBackgroundColor(0xFFFF9800);
+            btnPagar.setBackgroundColor(0xFF4CAF50);
             btnPagar.setTextColor(0xFFFFFFFF);
-            btnPagar.setPadding(16, 8, 16, 8);
-
-            LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1
-            );
-            btnParams.setMargins(8, 0, 0, 0);
-            btnPagar.setLayoutParams(btnParams);
-
             btnPagar.setOnClickListener(v -> confirmarPagar(pedido));
             layoutBotones.addView(btnPagar);
         }
 
         card.addView(tvId);
-        card.addView(tvMesa);
         card.addView(tvTotal);
         card.addView(tvEstado);
         if (layoutBotones.getChildCount() > 0) {
@@ -209,7 +154,8 @@ public class PedidosFragment extends Fragment {
     private String getEstadoTexto(String estado) {
         switch (estado) {
             case "pendiente": return "🟡 Pendiente";
-            case "entregado": return "🔵 Entregado";
+            case "preparacion": return "👨‍🍳 En Preparación";
+            case "listo": return "🔔 Listo";
             case "pagado": return "🟢 Pagado";
             case "cancelado": return "🔴 Cancelado";
             default: return estado;
@@ -219,7 +165,8 @@ public class PedidosFragment extends Fragment {
     private int getEstadoColor(String estado) {
         switch (estado) {
             case "pendiente": return 0xFFFF9800;
-            case "entregado": return 0xFF2196F3;
+            case "preparacion": return 0xFF9C27B0;
+            case "listo": return 0xFF2196F3;
             case "pagado": return 0xFF4CAF50;
             case "cancelado": return 0xFFF44336;
             default: return 0xFF666666;
@@ -228,8 +175,11 @@ public class PedidosFragment extends Fragment {
 
     private void cambiarEstado(Pedido pedido, String nuevoEstado) {
         pedido.setEstado(nuevoEstado);
-        db.pedidoDao().update(pedido);
-        Toast.makeText(getContext(), "✅ Pedido #" + pedido.getId() + " " + getEstadoTexto(nuevoEstado), Toast.LENGTH_SHORT).show();
+        db.pedidoDao().update(pedido); // 1. Guarda en local
+
+        pedidoRepository.actualizarEstadoEnFirestore(pedido); // 2. Actualiza en la nube (NUEVO)
+
+        Toast.makeText(getContext(), "Pedido #" + pedido.getId() + " actualizado", Toast.LENGTH_SHORT).show();
         cargarPedidos();
     }
 
@@ -237,21 +187,15 @@ public class PedidosFragment extends Fragment {
         new AlertDialog.Builder(getContext())
                 .setTitle("Cancelar Pedido")
                 .setMessage("¿Estás seguro de cancelar el Pedido #" + pedido.getId() + "?")
-                .setPositiveButton("Sí, cancelar", (dialog, which) -> {
-                    cambiarEstado(pedido, "cancelado");
-                })
-                .setNegativeButton("No", null)
-                .show();
+                .setPositiveButton("Sí", (dialog, which) -> cambiarEstado(pedido, "cancelado"))
+                .setNegativeButton("No", null).show();
     }
 
     private void confirmarPagar(Pedido pedido) {
         new AlertDialog.Builder(getContext())
                 .setTitle("Pagar Pedido")
-                .setMessage("¿Estás seguro de registrar el pago del Pedido #" + pedido.getId() + "?\nTotal: $" + String.format("%.2f", pedido.getTotal()))
-                .setPositiveButton("Sí, pagar", (dialog, which) -> {
-                    cambiarEstado(pedido, "pagado");
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .setMessage("¿Registrar pago del Pedido #" + pedido.getId() + "?\nTotal: $" + String.format("%.2f", pedido.getTotal()))
+                .setPositiveButton("Sí, pagar", (dialog, which) -> cambiarEstado(pedido, "pagado"))
+                .setNegativeButton("Cancelar", null).show();
     }
 }

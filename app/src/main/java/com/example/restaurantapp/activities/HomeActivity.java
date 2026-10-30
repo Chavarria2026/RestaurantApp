@@ -15,8 +15,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.restaurantapp.R;
+import com.example.restaurantapp.fragments.CocinaFragment; // <-- IMPORT NUEVO
 import com.example.restaurantapp.fragments.InicioFragment;
-import com.example.restaurantapp.fragments.MapaFragment; // <--- IMPORT NUEVO
+import com.example.restaurantapp.fragments.MapaFragment;
 import com.example.restaurantapp.fragments.MenuFragment;
 import com.example.restaurantapp.fragments.PedidosFragment;
 import com.example.restaurantapp.fragments.PerfilFragment;
@@ -35,9 +36,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // FORZAR MODO CLARO
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
@@ -66,21 +65,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             int itemId = item.getItemId();
             if (itemId == R.id.nav_inicio) {
                 cargarFragment(new InicioFragment());
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Inicio");
-                }
+                if (getSupportActionBar() != null) getSupportActionBar().setTitle("Inicio");
                 return true;
             } else if (itemId == R.id.nav_menu) {
                 cargarFragment(new MenuFragment());
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Menú");
-                }
+                if (getSupportActionBar() != null) getSupportActionBar().setTitle("Menú");
                 return true;
             } else if (itemId == R.id.nav_perfil) {
                 cargarFragment(new PerfilFragment());
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Perfil");
-                }
+                if (getSupportActionBar() != null) getSupportActionBar().setTitle("Perfil");
                 return true;
             }
             return false;
@@ -108,36 +101,27 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_inicio) {
             cargarFragment(new InicioFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Inicio");
-            }
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Inicio");
             bottomNavigationView.setSelectedItemId(R.id.nav_inicio);
         } else if (id == R.id.nav_menu) {
             cargarFragment(new MenuFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Menú");
-            }
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Menú");
             bottomNavigationView.setSelectedItemId(R.id.nav_menu);
         } else if (id == R.id.nav_pedidos) {
             cargarFragment(new PedidosFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Mis Pedidos");
-            }
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Mis Pedidos");
+        } else if (id == R.id.nav_cocina) { // <-- NUEVO BLOQUE
+            cargarFragment(new CocinaFragment());
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Modo Cocina");
         } else if (id == R.id.nav_ventas) {
             cargarFragment(new VentasFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Ventas");
-            }
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Ventas");
         } else if (id == R.id.nav_perfil) {
             cargarFragment(new PerfilFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Perfil");
-            }
-        } else if (id == R.id.nav_mapa) { // <--- NUEVO BLOQUE PARA EL MAPA
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Perfil");
+        } else if (id == R.id.nav_mapa) {
             cargarFragment(new MapaFragment());
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Ubicación");
-            }
+            if (getSupportActionBar() != null) getSupportActionBar().setTitle("Ubicación");
         } else if (id == R.id.nav_config) {
             Intent intent = new Intent(this, ConfiguracionActivity.class);
             startActivity(intent);

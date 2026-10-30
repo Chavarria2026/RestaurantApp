@@ -12,7 +12,7 @@ import com.example.restaurantapp.models.Usuario;
 
 @Database(
         entities = {Usuario.class, Producto.class, Pedido.class, DetallePedido.class},
-        version = 3, // <--- AQUÍ ESTÁ EL CAMBIO (antes era 2)
+        version = 5, // <--- AQUÍ ESTÁ EL CAMBIO (antes era 2)
         exportSchema = false
 )
 @TypeConverters({Converters.class})

@@ -19,6 +19,7 @@ import com.example.restaurantapp.models.DetallePedido;
 import com.example.restaurantapp.models.ItemCarrito;
 import com.example.restaurantapp.models.Pedido;
 import com.example.restaurantapp.models.Producto;
+import com.example.restaurantapp.repositories.PedidoRepository; // NUEVO IMPORT
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,16 +27,15 @@ public class EditarPedidoActivity extends AppCompatActivity {
 
     private EditText etNotas;
     private RecyclerView rvProductos;
-    private LinearLayout layoutCarrito;
+    private LinearLayout layoutCarrito, layoutTotales;
     private TextView tvSubtotal, tvImpuesto, tvTotal, tvCarritoVacio;
     private Button btnGuardarCambios, btnAgregarProductos;
-    private LinearLayout layoutTotales;
 
     private AppDatabase db;
+    private PedidoRepository pedidoRepository; // NUEVA VARIABLE
     private List<Producto> listaProductos;
     private List<ItemCarrito> carrito;
     private ProductoSelectorAdapter productoAdapter;
-    private SharedPreferences preferences;
     private int pedidoId;
     private Pedido pedidoActual;
 
@@ -70,7 +70,7 @@ public class EditarPedidoActivity extends AppCompatActivity {
         }
 
         db = AppDatabase.getInstance(this);
-        preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
+        pedidoRepository = new PedidoRepository(this); // INICIALIZAMOS EL REPOSITORIO
         carrito = new ArrayList<>();
 
         cargarPedido();
@@ -210,14 +210,17 @@ public class EditarPedidoActivity extends AppCompatActivity {
         double impuesto = subtotal * 0.13;
         double total = subtotal + impuesto;
 
+        // 1. Actualizamos los datos del pedido en el objeto
         pedidoActual.setSubtotal(subtotal);
         pedidoActual.setImpuesto(impuesto);
         pedidoActual.setTotal(total);
         pedidoActual.setNotas(etNotas.getText().toString().trim());
-        db.pedidoDao().update(pedidoActual);
 
+        // 2. Guardamos en Room (Base de datos local)
+        db.pedidoDao().update(pedidoActual);
         db.detallePedidoDao().deleteDetallesByPedido(pedidoId);
 
+        List<DetallePedido> nuevaListaDetalles = new ArrayList<>();
         for (ItemCarrito item : carrito) {
             DetallePedido detalle = new DetallePedido(
                     pedidoId,
@@ -228,9 +231,15 @@ public class EditarPedidoActivity extends AppCompatActivity {
                     ""
             );
             db.detallePedidoDao().insert(detalle);
+            nuevaListaDetalles.add(detalle);
         }
 
-        Toast.makeText(this, "✅ Pedido actualizado correctamente", Toast.LENGTH_LONG).show();
+        pedidoActual.setDetalles(nuevaListaDetalles);
+
+        // 3. ¡AQUÍ ESTÁ LA MAGIA! Actualizamos en Firestore (Nube)
+        pedidoRepository.actualizarPedidoEnFirestore(pedidoActual);
+
+        Toast.makeText(this, "✅ Pedido actualizado localmente", Toast.LENGTH_LONG).show();
         finish();
     }
 
