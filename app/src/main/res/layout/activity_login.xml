@@ -4,21 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/gradient_background">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="32dp"
+        android:padding="24dp"
         android:gravity="center">
 
+        <!-- Logo e Identidad -->
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginBottom="24dp"
-            android:src="@drawable/logo_restaurant"
-            android:contentDescription="Logo" />
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/logo_restaurant" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -26,43 +27,61 @@
             android:text="Restaurant App"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/primary"
             android:layout_marginBottom="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bienvenido a tu restaurante favorito"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="40dp" />
+            android:text="Ingresa a tu cuenta"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="32dp" />
 
-        <!-- Inputs en color negro para que se lean -->
-        <EditText
-            android:id="@+id/etEmail"
+        <!-- Campo de Correo -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmail"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Correo Electrónico"
-            android:inputType="textEmailAddress"
-            android:padding="14dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/edittext_background"
-            android:textColorHint="#888888"
-            android:textColor="#000000" />
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            android:layout_marginBottom="16dp">
 
-        <EditText
-            android:id="@+id/etPassword"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Campo de Contraseña -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassword"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Contraseña (min. 8 caracteres)"
-            android:inputType="textPassword"
-            android:padding="14dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/edittext_background"
-            android:textColorHint="#888888"
-            android:textColor="#000000" />
+            android:hint="Contraseña"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:passwordToggleEnabled="true"
+            android:layout_marginBottom="16dp">
 
-        <!-- Chip visible con fondo blanco y letras oscuras -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Chip de Recordar -->
         <com.google.android.material.chip.Chip
             android:id="@+id/chipRecordar"
             android:layout_width="wrap_content"
@@ -70,41 +89,37 @@
             android:layout_gravity="start"
             android:layout_marginBottom="24dp"
             android:text="Recordar mis credenciales"
-            android:textColor="#002366"
+            android:textColor="@color/primary"
             app:chipIcon="@android:drawable/ic_lock_idle_lock"
-            app:chipIconTint="#002366"
-            app:chipBackgroundColor="#FFFFFF"
+            app:chipIconTint="@color/primary"
+            app:chipBackgroundColor="@color/surface"
+            app:chipStrokeColor="@color/primary"
+            app:chipStrokeWidth="1dp"
             android:checkable="true" />
 
-        <LinearLayout
+        <!-- Botón Ingresar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_height="56dp"
+            android:text="Ingresar"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/secondary"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="16dp"/>
 
-            <Button
-                android:id="@+id/btnLogin"
-                android:layout_width="140dp"
-                android:layout_height="50dp"
-                android:text="Ingresar"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginEnd="20dp"
-                android:background="@drawable/button_primary"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/btnRegister"
-                android:layout_width="140dp"
-                android:layout_height="50dp"
-                android:text="Registrar"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:background="@drawable/button_secondary"
-                android:textColor="#FFFFFF" />
-
-        </LinearLayout>
+        <!-- Botón Registrarse -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegister"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Crear una cuenta nueva"
+            android:textSize="16sp"
+            app:strokeColor="@color/primary"
+            android:textColor="@color/primary"
+            app:cornerRadius="12dp"/>
 
     </LinearLayout>
-
 </ScrollView>

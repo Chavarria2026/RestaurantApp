@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -14,11 +13,13 @@ import com.example.restaurantapp.models.Usuario;
 import com.example.restaurantapp.utils.NetworkUtils;
 import com.example.restaurantapp.utils.ValidationUtils;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.textfield.TextInputEditText; // NUEVO IMPORT
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etEmail, etPassword;
+    // CAMBIO: Ahora son de tipo TextInputEditText
+    private TextInputEditText etEmail, etPassword;
     private Button btnLogin, btnRegister;
     private Chip chipRecordar;
     private SharedPreferences preferences;
@@ -31,16 +32,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // INICIALIZAMOS CON LOS NOMBRES DEL NUEVO XML
+        // Inicialización de los nuevos campos
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
         chipRecordar = findViewById(R.id.chipRecordar);
-
-        // Forzar color de texto negro por si el fondo es blanco
-        etEmail.setTextColor(0xFF000000);
-        etPassword.setTextColor(0xFF000000);
 
         preferences = getSharedPreferences("RestaurantPrefs", MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
@@ -65,8 +62,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void intentarLogin() {
-        String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+        String password = etPassword.getText() != null ? etPassword.getText().toString().trim() : "";
 
         if (!ValidationUtils.isValidEmail(email)) {
             etEmail.setError("Correo inválido");
@@ -107,8 +104,16 @@ public class LoginActivity extends AppCompatActivity {
     private void guardarSesion(String email, String password) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("isLoggedIn", true);
-        editor.putString("loggedUser", email); // Usamos email como identificador
+        editor.putString("loggedUser", email);
         editor.putString("email", email);
+
+        // Guardar rol (si usaste la implementación de roles)
+        Usuario user = db.usuarioDao().getUsuarioByEmail(email);
+        if (user != null) {
+            editor.putString("userRole", user.getRol());
+        } else {
+            editor.putString("userRole", "mesero");
+        }
 
         // Guardar credenciales si el Chip está activo
         if (chipRecordar.isChecked()) {

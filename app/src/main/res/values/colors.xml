@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#FF5722</color>
-    <color name="primary_dark">#E64A19</color>
-    <color name="primary_light">#FF8A50</color>
-    <color name="accent">#FF9800</color>
+    <!-- Colores Principales -->
+    <color name="primary">#0A2540</color> <!-- Azul marino oscuro del logo -->
+    <color name="primary_light">#1E3A8A</color>
+    <color name="secondary">#FF6B00</color> <!-- Naranja vibrante -->
+    <color name="secondary_light">#FF9A44</color>
+
+    <!-- Fondos -->
+    <color name="background">#F8F9FA</color>
+    <color name="surface">#FFFFFF</color>
+
+    <!-- Textos -->
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#6C757D</color>
     <color name="white">#FFFFFF</color>
-    <color name="black">#333333</color>
-    <color name="gray_light">#F5F5F5</color>
-    <color name="gray_dark">#757575</color>
+
+    <!-- Estados -->
+    <color name="success">#28A745</color>
+    <color name="danger">#DC3545</color>
+    <color name="warning">#FFC107</color>
+    <color name="info">#17A2B8</color>
 </resources>
